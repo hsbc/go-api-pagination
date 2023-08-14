@@ -2,6 +2,7 @@ package pagination
 
 import (
 	"context"
+
 	"github.com/google/go-github/v53/github"
 )
 
@@ -57,16 +58,18 @@ type PaginatorOpts struct {
 }
 
 func Paginator[T any](ctx context.Context, listFunc ListFunc[T], processFunc ProcessFunc[T], rateLimitFunc RateLimitFunc, Opts *PaginatorOpts) ([]T, error) {
+	var allItems []T
 
 	opts := listOpts(Opts)
-	var allItems []T
 
 	for {
 		items, resp, err := listFunc.List(ctx, opts)
 		if err != nil {
 			return allItems, err
 		}
+
 		allItems = append(allItems, items...)
+
 		for _, item := range items {
 			if err = processFunc.Process(ctx, item); err != nil {
 				return allItems, err
@@ -78,6 +81,7 @@ func Paginator[T any](ctx context.Context, listFunc ListFunc[T], processFunc Pro
 		if err != nil {
 			return allItems, err
 		}
+
 		if !shouldContinue {
 			break
 		}
@@ -85,8 +89,10 @@ func Paginator[T any](ctx context.Context, listFunc ListFunc[T], processFunc Pro
 		if resp.NextPage == 0 {
 			break
 		}
+
 		opts.Page = resp.NextPage
 	}
+
 	return allItems, nil
 }
 
@@ -94,5 +100,6 @@ func listOpts(opts *PaginatorOpts) *github.ListOptions {
 	if opts == nil || opts.ListOptions == nil {
 		return &github.ListOptions{PerPage: 100, Page: 1}
 	}
+
 	return opts.ListOptions
 }

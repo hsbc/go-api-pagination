@@ -60,7 +60,9 @@ func (l *listFunc) List(ctx context.Context, opt *github.ListOptions) ([]*github
 		Visibility:  "public",
 		ListOptions: *opt,
 	}
+
 	t, r, err := l.client.Repositories.List(ctx, "xorima", &rOpts)
+
 	return t, r, err
 }
 
@@ -77,18 +79,22 @@ func Test_Paginator(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator")
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
+
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitFunc{}
 		lFunc := &listFunc{client: client}
 		opts := PaginatorOpts{ListOptions: &github.ListOptions{Page: 1, PerPage: 10}}
+
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
 		assert.NoError(t, err)
 		assert.Len(t, resp, 59)
 	})
+
 	t.Run("should return when ratelimter returns a false response", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-with-opts")
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
+
 		want := 2
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitReturnNowFunc{}
@@ -98,12 +104,13 @@ func Test_Paginator(t *testing.T) {
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
 		assert.NoError(t, err)
 		assert.Len(t, resp, want)
-
 	})
+
 	t.Run("should use default opts if none provided", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-default-opts")
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
+
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitFunc{}
 		lFunc := &listFunc{client: client}
@@ -117,6 +124,7 @@ func Test_Paginator(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-list")
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
+
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitFunc{}
 		lFunc := &listErrorFunc{client: client}
@@ -130,6 +138,7 @@ func Test_Paginator(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-rate-limit")
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
+
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitErrorFunc{}
 		lFunc := &listFunc{client: client}
@@ -137,10 +146,12 @@ func Test_Paginator(t *testing.T) {
 		_, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
 		assert.Error(t, err)
 	})
+
 	t.Run("should return any error encountered by the process function", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-process")
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
+
 		pFunc := &processErrorFunc{client: client}
 		rFunc := &rateLimitFunc{}
 		lFunc := &listFunc{client: client}
@@ -163,6 +174,7 @@ func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder) {
 
 	// Start our recorder
 	opts := recorder.Options{RealTransport: tr, CassetteName: vcrPath, Mode: recorder.ModeReplayWithNewEpisodes}
+
 	r, err := recorder.NewWithOptions(&opts)
 	if err != nil {
 		panic(err)
@@ -179,12 +191,13 @@ func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder) {
 
 		return nil
 	}
+
 	r.AddHook(hook, recorder.AfterCaptureHook)
 
 	// custom http.client
 	httpClient := &http.Client{
 		Transport: r,
 	}
-	return github.NewClient(httpClient), r
 
+	return github.NewClient(httpClient), r
 }
