@@ -3,14 +3,15 @@ package pagination
 import (
 	"context"
 	"errors"
+	"net/http"
+	"os"
+	"testing"
+
 	"github.com/google/go-github/v53/github"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
 	"gopkg.in/dnaeon/go-vcr.v3/cassette"
 	"gopkg.in/dnaeon/go-vcr.v3/recorder"
-	"net/http"
-	"os"
-	"testing"
 )
 
 type processFunc struct {
@@ -74,6 +75,7 @@ func (l *listErrorFunc) List(ctx context.Context, opt *github.ListOptions) ([]*g
 func Test_Paginator(t *testing.T) {
 	t.Run("should return a list of items via pagination", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator")
+		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitFunc{}
@@ -85,6 +87,7 @@ func Test_Paginator(t *testing.T) {
 	})
 	t.Run("should return when ratelimter returns a false response", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-with-opts")
+		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 		want := 2
 		pFunc := &processFunc{client: client}
@@ -99,6 +102,7 @@ func Test_Paginator(t *testing.T) {
 	})
 	t.Run("should use default opts if none provided", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-default-opts")
+		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitFunc{}
@@ -111,6 +115,7 @@ func Test_Paginator(t *testing.T) {
 
 	t.Run("should return any error encountered by the list function", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-list")
+		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitFunc{}
@@ -123,6 +128,7 @@ func Test_Paginator(t *testing.T) {
 
 	t.Run("should return any error encountered by the rate limit function", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-rate-limit")
+		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 		pFunc := &processFunc{client: client}
 		rFunc := &rateLimitErrorFunc{}
@@ -133,6 +139,7 @@ func Test_Paginator(t *testing.T) {
 	})
 	t.Run("should return any error encountered by the process function", func(t *testing.T) {
 		client, r := newVcrGithubClient("fixtures/paginator-process")
+		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 		pFunc := &processErrorFunc{client: client}
 		rFunc := &rateLimitFunc{}
