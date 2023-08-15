@@ -1,4 +1,4 @@
-# README for Pagination Package
+# go-api-pagination
 
 ## Introduction
 
