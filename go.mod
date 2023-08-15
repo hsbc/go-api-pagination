@@ -1,6 +1,6 @@
-module github.com/xorima/go-github-pagination
+module github.com/xorima/go-api-pagination
 
-go 1.21
+go 1.18
 
 require (
 	github.com/google/go-github/v53 v53.2.0
