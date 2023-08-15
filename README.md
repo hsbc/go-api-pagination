@@ -11,7 +11,7 @@ The `pagination` package provides a simple and efficient way to handle paginatio
 To get started with the `pagination` package, you can install it using the `go get` command:
 
 ```bash
-go get github.com/xorima/my-repo
+go get github.com/xorima/go-api-pagination
 ```
 
 ### Importing the Package
@@ -19,7 +19,7 @@ go get github.com/xorima/my-repo
 After installation, you can import the package in your Go code:
 
 ```go
-import "github.com/xorima/my-repo/pagination"
+import "github.com/xorima/go-api-pagination/pagination"
 ```
 
 ## Usage
