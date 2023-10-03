@@ -3,7 +3,7 @@ module github.com/xorima/go-api-pagination
 go 1.18
 
 require (
-	github.com/google/go-github/v53 v53.2.0
+	github.com/google/go-github/v55 v55.0.0
 	github.com/google/go-github/v55 v55.0.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/oauth2 v0.12.0
