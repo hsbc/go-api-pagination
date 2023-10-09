@@ -77,7 +77,8 @@ func (l *listErrorFunc) List(ctx context.Context, opt *github.ListOptions) ([]*g
 
 func Test_Paginator(t *testing.T) {
 	t.Run("should return a list of items via pagination", func(t *testing.T) {
-		client, r := newVcrGithubClient("fixtures/paginator")
+		client, r, err := newVcrGithubClient("fixtures/paginator")
+		assert.NoError(t, err)
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 
@@ -92,7 +93,8 @@ func Test_Paginator(t *testing.T) {
 	})
 
 	t.Run("should return when ratelimter returns a false response", func(t *testing.T) {
-		client, r := newVcrGithubClient("fixtures/paginator-with-opts")
+		client, r, err := newVcrGithubClient("fixtures/paginator-with-opts")
+		assert.NoError(t, err)
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 
@@ -108,7 +110,8 @@ func Test_Paginator(t *testing.T) {
 	})
 
 	t.Run("should use default opts if none provided", func(t *testing.T) {
-		client, r := newVcrGithubClient("fixtures/paginator-default-opts")
+		client, r, err := newVcrGithubClient("fixtures/paginator-default-opts")
+		assert.NoError(t, err)
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 
@@ -121,7 +124,8 @@ func Test_Paginator(t *testing.T) {
 		assert.Len(t, resp, 59)
 	})
 	t.Run("should use 100 per page if per page is 0 (resource exhaustion)", func(t *testing.T) {
-		client, r := newVcrGithubClient("fixtures/paginator-opts-min-per-page")
+		client, r, err := newVcrGithubClient("fixtures/paginator-opts-min-per-page")
+		assert.NoError(t, err)
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 
@@ -139,7 +143,8 @@ func Test_Paginator(t *testing.T) {
 	})
 
 	t.Run("should return any error encountered by the list function", func(t *testing.T) {
-		client, r := newVcrGithubClient("fixtures/paginator-list")
+		client, r, err := newVcrGithubClient("fixtures/paginator-list")
+		assert.NoError(t, err)
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 
@@ -153,7 +158,8 @@ func Test_Paginator(t *testing.T) {
 	})
 
 	t.Run("should return any error encountered by the rate limit function", func(t *testing.T) {
-		client, r := newVcrGithubClient("fixtures/paginator-rate-limit")
+		client, r, err := newVcrGithubClient("fixtures/paginator-rate-limit")
+		assert.NoError(t, err)
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 
@@ -161,12 +167,13 @@ func Test_Paginator(t *testing.T) {
 		rFunc := &rateLimitErrorFunc{}
 		lFunc := &listFunc{client: client}
 
-		_, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
+		_, err = Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
 		assert.Error(t, err)
 	})
 
 	t.Run("should return any error encountered by the process function", func(t *testing.T) {
-		client, r := newVcrGithubClient("fixtures/paginator-process")
+		client, r, err := newVcrGithubClient("fixtures/paginator-process")
+		assert.NoError(t, err)
 		//nolint:errcheck // this is used as a cleanup
 		defer r.Stop()
 
@@ -174,12 +181,12 @@ func Test_Paginator(t *testing.T) {
 		rFunc := &rateLimitFunc{}
 		lFunc := &listFunc{client: client}
 
-		_, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
+		_, err = Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
 		assert.Error(t, err)
 	})
 }
 
-func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder) {
+func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder, error) {
 	//custom http.Transport, since github uses oauth2 authentication
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
@@ -195,7 +202,7 @@ func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder) {
 
 	r, err := recorder.NewWithOptions(&opts)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
 	// Filter out dynamic & sensitive data/headers
@@ -217,5 +224,5 @@ func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder) {
 		Transport: r,
 	}
 
-	return github.NewClient(httpClient), r
+	return github.NewClient(httpClient), r, nil
 }
