@@ -97,8 +97,12 @@ func Paginator[T any](ctx context.Context, listFunc ListFunc[T], processFunc Pro
 }
 
 func listOpts(opts *PaginatorOpts) *github.ListOptions {
+
 	if opts == nil || opts.ListOptions == nil {
 		return &github.ListOptions{PerPage: 100, Page: 1}
+	}
+	if opts.PerPage == 0 {
+		opts.PerPage = 100
 	}
 
 	return opts.ListOptions

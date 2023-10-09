@@ -3,6 +3,7 @@ package pagination
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -118,6 +119,23 @@ func Test_Paginator(t *testing.T) {
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
 		assert.NoError(t, err)
 		assert.Len(t, resp, 59)
+	})
+	t.Run("should use 100 per page if per page is 0 (resource exhaustion)", func(t *testing.T) {
+		client, r := newVcrGithubClient("fixtures/paginator-opts-min-per-page")
+		//nolint:errcheck // this is used as a cleanup
+		defer r.Stop()
+
+		pFunc := &processFunc{client: client}
+		rFunc := &rateLimitFunc{}
+		lFunc := &listFunc{client: client}
+		opts := PaginatorOpts{ListOptions: &github.ListOptions{Page: 1, PerPage: 0}}
+
+		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
+		assert.NoError(t, err)
+		fmt.Println(resp)
+		fmt.Println(len(resp))
+		// at time of creating the fixture there were 63 public repos
+		assert.Len(t, resp, 63)
 	})
 
 	t.Run("should return any error encountered by the list function", func(t *testing.T) {
