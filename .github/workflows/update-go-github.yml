@@ -31,7 +31,11 @@ jobs:
           echo "::set-output name=old_version::$OLD_VERSION"
           echo "::set-output name=new_version::$NEW_VERSION"
 
-      - name: Replace version in files
+      - name: Remove old version reference from go.mod
+        run: |
+          sed -i "/github.com\/google\/go-github\/${{ steps.extract_versions.outputs.old_version }}/d" go.mod
+
+      - name: Replace old version in files with new version
         run: |
           grep -rl "${{ steps.extract_versions.outputs.old_version }}" . | xargs sed -i 's/${{ steps.extract_versions.outputs.old_version }}/${{ steps.extract_versions.outputs.new_version }}/g'
 
