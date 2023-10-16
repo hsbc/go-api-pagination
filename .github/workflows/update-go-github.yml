@@ -6,7 +6,7 @@ name: update go-github version
 
 jobs:
   update-version:
-    if: github.event.pull_request.user.login == 'renovate'
+    if: contains(github.event.pull_request.title, 'update module github.com/google/go-github/')
     runs-on: ubuntu-latest
 
     steps:
