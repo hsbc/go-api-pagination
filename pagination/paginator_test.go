@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-github/v55/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
 	"gopkg.in/dnaeon/go-vcr.v3/cassette"
