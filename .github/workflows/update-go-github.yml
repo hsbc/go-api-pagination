@@ -3,53 +3,6 @@ name: update go-github version
 "on":
   pull_request:
     types: [opened, synchronize, reopened]
-
 jobs:
-  update-version:
-    if: contains(github.event.pull_request.title, 'update module github.com/google/go-github/')
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-
-      - name: Extract version numbers from PR title
-        id: extract_versions
-        run: |
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          OLD_VERSION=$(echo $PR_TITLE | grep -oP 'v\d+' | head -1)
-          NEW_VERSION=$(echo $PR_TITLE | grep -oP 'v\d+' | tail -1)
-          
-          echo "Old version: $OLD_VERSION"
-          echo "New version: $NEW_VERSION"
-          
-          echo "::set-output name=old_version::$OLD_VERSION"
-          echo "::set-output name=new_version::$NEW_VERSION"
-
-      - name: Remove old version reference from go.mod
-        run: |
-          sed -i "/github.com\/google\/go-github\/${{ steps.extract_versions.outputs.old_version }}/d" go.mod
-          sed -i "/github.com\/google\/go-github\/${{ steps.extract_versions.outputs.old_version }}/d" go.sum
-
-      - name: Replace old version in files with new version
-        run: |
-          grep -rl "${{ steps.extract_versions.outputs.old_version }}" . | xargs sed -i 's/${{ steps.extract_versions.outputs.old_version }}/${{ steps.extract_versions.outputs.new_version }}/g'
-
-      - name: go mod tidy
-        run: |
-          go mod tidy
-
-      - name: Commit Changes to actions.yml
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: "fix(deps) Update go-github refs from ${{ steps.extract_versions.outputs.old_version }} to ${{ steps.extract_versions.outputs.new_version }}"
-          add: "."
-          default_author: github_actions
+  pull_request:
+    uses: xorima/reusable-workflows/.github/workflows/
