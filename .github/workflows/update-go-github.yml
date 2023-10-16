@@ -1,3 +1,4 @@
+---
 name: update go-github version
 
 "on":
@@ -5,4 +6,4 @@ name: update go-github version
     types: [opened, synchronize, reopened]
 jobs:
   pull_request:
-    uses: xorima/reusable-workflows/.github/workflows/
+    uses: xorima/reusable-workflows/.github/workflows/go-github-renovate-update.yaml
