@@ -1,7 +1,8 @@
 name: update go-github version
 
 "on":
-  workflow_call:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   update-version:
