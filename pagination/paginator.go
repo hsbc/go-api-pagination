@@ -2,6 +2,7 @@ package pagination
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/go-github/v55/github"
 )
@@ -57,6 +58,8 @@ type PaginatorOpts struct {
 	*github.ListOptions
 }
 
+var ErrPartialResultsPossible = errors.New("partial results possible")
+
 func Paginator[T any](ctx context.Context, listFunc ListFunc[T], processFunc ProcessFunc[T], rateLimitFunc RateLimitFunc, Opts *PaginatorOpts) ([]T, error) {
 	var allItems []T
 
@@ -83,10 +86,10 @@ func Paginator[T any](ctx context.Context, listFunc ListFunc[T], processFunc Pro
 		}
 
 		if !shouldContinue {
-			break
+			return allItems, ErrPartialResultsPossible
 		}
 
-		if resp.NextPage == 0 {
+		if resp.NextPage <= 0 {
 			break
 		}
 

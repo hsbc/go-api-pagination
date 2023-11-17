@@ -105,7 +105,7 @@ func Test_Paginator(t *testing.T) {
 		opts := PaginatorOpts{ListOptions: &github.ListOptions{Page: 1, PerPage: want}}
 
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
-		assert.NoError(t, err)
+		assert.ErrorIs(t, err, ErrPartialResultsPossible)
 		assert.Len(t, resp, want)
 	})
 
