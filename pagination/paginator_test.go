@@ -3,7 +3,6 @@ package pagination
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -57,12 +56,11 @@ type listFunc struct {
 }
 
 func (l *listFunc) List(ctx context.Context, opt *github.ListOptions) ([]*github.Repository, *github.Response, error) {
-	rOpts := github.RepositoryListOptions{
+	rOpts := github.RepositoryListByAuthenticatedUserOptions{
 		Visibility:  "public",
 		ListOptions: *opt,
 	}
-
-	t, r, err := l.client.Repositories.List(ctx, "xorima", &rOpts)
+	t, r, err := l.client.Repositories.ListByAuthenticatedUser(ctx, &rOpts)
 
 	return t, r, err
 }
@@ -89,7 +87,7 @@ func Test_Paginator(t *testing.T) {
 
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
 		assert.NoError(t, err)
-		assert.Len(t, resp, 73)
+		assert.Len(t, resp, 371)
 	})
 
 	t.Run("should return when ratelimter returns a false response", func(t *testing.T) {
@@ -121,7 +119,7 @@ func Test_Paginator(t *testing.T) {
 
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
 		assert.NoError(t, err)
-		assert.Len(t, resp, 73)
+		assert.Len(t, resp, 371)
 	})
 	t.Run("should use 100 per page if per page is 0 (resource exhaustion)", func(t *testing.T) {
 		client, r, err := newVcrGithubClient("fixtures/paginator-opts-min-per-page")
@@ -136,10 +134,8 @@ func Test_Paginator(t *testing.T) {
 
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
 		assert.NoError(t, err)
-		fmt.Println(resp)
-		fmt.Println(len(resp))
-		// at time of creating the fixture there were 63 public repos
-		assert.Len(t, resp, 73)
+		// at time of creating the fixture there were 73 public repos
+		assert.Len(t, resp, 371)
 	})
 
 	t.Run("should return any error encountered by the list function", func(t *testing.T) {
