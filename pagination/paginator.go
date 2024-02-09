@@ -3,7 +3,7 @@ package pagination
 import (
 	"context"
 
-	"github.com/google/go-github/v58/github"
+	"github.com/google/go-github/v59/github"
 )
 
 // ListFunc is an interface that returns a list of items for the given type
