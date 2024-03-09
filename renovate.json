@@ -1,6 +1,6 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:base"],
+    "extends": ["config:base", ":disableDependencyDashboard"],
     "packageRules": [{
         "matchUpdateTypes": ["patch", "pin", "digest"],
         "automerge": true,
@@ -8,8 +8,8 @@
       },
       {
         "matchUpdateTypes": ["major"],
-        "automerge": false,
-        "addLabels": ["Release: Patch"]
+        "automerge": true,
+        "addLabels": ["Release: Major"]
       }
     ]
   }
