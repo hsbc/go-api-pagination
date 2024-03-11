@@ -1,4 +1,4 @@
-module github.com/xorima/go-api-pagination
+module github.com/hsbc/go-api-pagination
 
 go 1.22
 
