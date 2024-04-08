@@ -6,6 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/google/go-github/v60 v60.0.0
+	github.com/google/go-github/v61 v61.0.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.19.0
 	gopkg.in/dnaeon/go-vcr.v3 v3.2.0
