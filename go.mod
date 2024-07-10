@@ -5,7 +5,6 @@ go 1.22
 toolchain go1.22.5
 
 require (
-	github.com/google/go-github/v62 v62.0.0
 	github.com/google/go-github/v63 v63.0.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.21.0
