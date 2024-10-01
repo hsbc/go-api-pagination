@@ -2,7 +2,7 @@ module github.com/hsbc/go-api-pagination
 
 go 1.22
 
-toolchain go1.22.6
+toolchain go1.23.2
 
 require (
 	github.com/google/go-github/v65 v65.0.0
