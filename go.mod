@@ -9,7 +9,6 @@ require (
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.24.0
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.2
-	gopkg.in/dnaeon/go-vcr.v4 v4.0.2
 )
 
 require (
