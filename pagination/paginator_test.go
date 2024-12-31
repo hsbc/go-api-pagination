@@ -4,14 +4,12 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/google/go-github/v68/github"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
-	"gopkg.in/dnaeon/go-vcr.v3/cassette"
-	"gopkg.in/dnaeon/go-vcr.v3/recorder"
+	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
 type processFunc struct {
@@ -87,7 +85,7 @@ func Test_Paginator(t *testing.T) {
 
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
 		assert.NoError(t, err)
-		assert.Len(t, resp, 371)
+		assert.Len(t, resp, 378)
 	})
 
 	t.Run("should return when ratelimter returns a false response", func(t *testing.T) {
@@ -119,7 +117,7 @@ func Test_Paginator(t *testing.T) {
 
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, nil)
 		assert.NoError(t, err)
-		assert.Len(t, resp, 371)
+		assert.Len(t, resp, 378)
 	})
 	t.Run("should use 100 per page if per page is 0 (resource exhaustion)", func(t *testing.T) {
 		client, r, err := newVcrGithubClient("fixtures/paginator-opts-min-per-page")
@@ -135,7 +133,7 @@ func Test_Paginator(t *testing.T) {
 		resp, err := Paginator[*github.Repository](context.Background(), lFunc, pFunc, rFunc, &opts)
 		assert.NoError(t, err)
 		// at time of creating the fixture there were 73 public repos
-		assert.Len(t, resp, 371)
+		assert.Len(t, resp, 378)
 	})
 
 	t.Run("should return any error encountered by the list function", func(t *testing.T) {
@@ -183,42 +181,25 @@ func Test_Paginator(t *testing.T) {
 }
 
 func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder, error) {
-	//custom http.Transport, since github uses oauth2 authentication
+
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+		&oauth2.Token{AccessToken: "PLACEHOLDER"},
 	)
+
+	t, _ := ts.Token()
 
 	tr := &oauth2.Transport{
 		Base:   http.DefaultTransport,
-		Source: oauth2.ReuseTokenSource(nil, ts),
+		Source: oauth2.ReuseTokenSource(t, ts),
 	}
 
-	// Start our recorder
-	opts := recorder.Options{RealTransport: tr, CassetteName: vcrPath, Mode: recorder.ModeReplayWithNewEpisodes, SkipRequestLatency: true}
-
-	r, err := recorder.NewWithOptions(&opts)
+	r, err := recorder.New(vcrPath, recorder.WithRealTransport(tr), recorder.WithMode(recorder.ModeRecordOnce), recorder.WithSkipRequestLatency(true))
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// Filter out dynamic & sensitive data/headers
-	// Your test code will continue to see the real access token and
-	// it is redacted before the recorded interactions are saved
-	// =====> commenting out this section has no impact on missing recording
-	hook := func(i *cassette.Interaction) error {
-		delete(i.Request.Headers, "Authorization")
-		delete(i.Request.Headers, "User-Agent")
-		i.Request.Headers["Authorization"] = []string{"Basic UExBQ0VIT0xERVI6UExBQ0VIT0xERVI="} //PLACEHOLDER:PLACEHOLDER
-
-		return nil
-	}
-
-	r.AddHook(hook, recorder.AfterCaptureHook)
-
-	// custom http.client
-	httpClient := &http.Client{
-		Transport: r,
-	}
+	httpClient := http.DefaultClient
+	httpClient.Transport = r
 
 	return github.NewClient(httpClient), r, nil
 }

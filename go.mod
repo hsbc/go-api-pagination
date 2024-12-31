@@ -8,7 +8,6 @@ require (
 	github.com/google/go-github/v68 v68.0.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.24.0
-	gopkg.in/dnaeon/go-vcr.v3 v3.2.0
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.2
 )
 
