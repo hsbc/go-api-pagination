@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/google/go-github/v69/github"
+	"github.com/google/go-github/v74/github"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
+	"gopkg.in/dnaeon/go-vcr.v4/pkg/cassette"
 	"gopkg.in/dnaeon/go-vcr.v4/pkg/recorder"
 )
 
@@ -193,7 +194,12 @@ func newVcrGithubClient(vcrPath string) (*github.Client, *recorder.Recorder, err
 		Source: oauth2.ReuseTokenSource(t, ts),
 	}
 
-	r, err := recorder.New(vcrPath, recorder.WithRealTransport(tr), recorder.WithMode(recorder.ModeRecordOnce), recorder.WithSkipRequestLatency(true))
+	r, err := recorder.New(vcrPath, recorder.WithRealTransport(tr), recorder.WithMatcher(
+		cassette.NewDefaultMatcher(
+			cassette.WithIgnoreUserAgent(),
+			cassette.WithIgnoreAuthorization(),
+		),
+	), recorder.WithMode(recorder.ModeRecordOnce), recorder.WithSkipRequestLatency(true))
 	if err != nil {
 		return nil, nil, err
 	}
